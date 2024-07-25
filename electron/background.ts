@@ -148,3 +148,17 @@ ipcMain.handle('select-folder', async () => {
     return { folderPath, imageCount: imageFiles.length };
   }
 });
+
+ipcMain.handle('read-csv', async (event, filePath) => {
+  try {
+    const data = fs.readFileSync(filePath, 'utf8');
+    const basePath = path.dirname(filePath);
+    return { success: true, data, basePath };
+  } catch (err) {
+    let errorMessage = 'An unknown error occurred';
+    if (err instanceof Error) {
+      errorMessage = err.message;
+    }
+    return { success: false, error: errorMessage };
+  }
+});

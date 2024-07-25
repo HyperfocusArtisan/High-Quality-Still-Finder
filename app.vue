@@ -7,10 +7,10 @@
     <UButton label="Open File" @click="openFile" id="openFileDialogButton" class="text-center m-2.5 py-2.5 px-5 text-base cursor-pointer rounded transition-colors duration-300 ease-in-out mb-4" />
     <div v-if="selectedFolder" class="mb-4">Found {{ imagecount }} Images</div>
     <div v-if="selectedFile" class="mb-4">Found {{ imagecount }} Images</div>
-    <div class="flex flex-row justify-between m-auto p-[2rem] border-2 border-gray-500 p-4 mb-4">
+    <div class="flex flex-row justify-between m-auto p-[2rem] border-2 border-gray-500 mb-4">
       <p class="mb-2">Choose your IQA-Model</p>
       <USelect v-model="model" :options="models" option-attribute="name" v-auto-animate class="text-center m-2.5 py-2.5 px-5 text-base cursor-pointer rounded transition-colors duration-300 ease-in-out mb-2" />
-      <UButton label="Rate Images" @click="openFile" class="text-center m-2.5 py-2.5 px-5 text-base cursor-pointer rounded transition-colors duration-300 ease-in-out" />
+      <UButton label="Rate Images" @click="triggerIqa" class="text-center m-2.5 py-2.5 px-5 text-base cursor-pointer rounded transition-colors duration-300 ease-in-out" />
     </div>
 
     <UCarousel v-slot="{ item }" :items="items" :ui="{ item: 'basis-full' }" class="text-center m-2.5 py-2.5 px-5 text-base cursor-pointer rounded transition-colors duration-300 ease-in-out overflow-hidden mb-4" arrows>
@@ -56,15 +56,26 @@
         </UCard>
       </UModal>
     </div>
+
+
+    <div>
+      <div v-if="items.length === 0">
+        No images to display.
+      </div>
+      <div v-else>
+        <div v-for="(image, index) in items" :key="index">
+          <img :src="image" alt="Filtered Image" />
+        </div>
+      </div>
+    </div>
     
   </div>
 </template>
 
 <script>
-import fs from 'fs';
 import path from 'path';
-import { ref } from 'vue';
-
+import axios from 'axios';
+import Papa from 'papaparse';
 
 const models = [{
   name: 'clipiqa',
@@ -83,15 +94,17 @@ export default {
       items: [
         'https://placehold.co/600x300?text=Rated+Images+Shown+Here',
       ],
-      sliderValue: 0.6,
+      sliderValue: 0.3,
       selectedFolder: null,
       selectedFile: null,
+      csvPath: null,
       model: 'clipiqa', // Define model here
       models: models, // Make models available in the template
       isImageViewerOpen: false,
       selectedImageSrc: '',
       image_files_results: [],
-      imagecount: 0
+      imagecount: 0,
+      filteredImages: []
     };
   },
   methods: {
@@ -127,6 +140,52 @@ export default {
     },
     sliderChanged() {
       console.log(`Slider changed to ${this.sliderValue}%`);
+    },
+    triggerIqa() {
+      axios.post('http://localhost:5000/iqa', {
+        directory_path: this.selectedFolder,
+        model: this.model
+      })
+      .then(response => {
+        console.log(response.data.message);
+        this.csvPath = response.data.csv_path;
+        this.filterImagesByScore();
+      })
+      .catch(error => {
+        console.error("There was an error!", error);
+      });
+
+    },
+    async filterImagesByScore() {
+      if (!this.csvPath) {
+        console.error("CSV path is not set.");
+        return;
+      }
+    
+      const result = await window.electron.invoke('read-csv', this.csvPath);
+    
+      if (!result.success) {
+        console.error("Error reading CSV file:", result.error);
+        return;
+      }
+    
+      console.log("CSV Data:", result.data);
+    
+      Papa.parse(result.data, {
+        header: true,
+        complete: (results) => {
+          console.log("Parsed CSV Results:", results.data);
+          const basePath = result.basePath; // Use the basePath from the result
+          this.filteredImages = results.data
+            .filter(row => parseFloat(row.score) >= this.sliderValue)
+            .map(row => path.join(basePath, row.filepath)); // Prepend the base path to the filenames
+          console.log("Filtered Images:", this.filteredImages);
+          this.items = this.filteredImages;
+        },
+        error: (error) => {
+          console.error("Error parsing CSV:", error);
+        }
+      });
     }
   },
   components: {
