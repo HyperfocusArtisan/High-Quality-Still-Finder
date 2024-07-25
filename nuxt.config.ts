@@ -2,9 +2,13 @@
 
 export default defineNuxtConfig({
     typescript: {
-		shim: false,
-	},
+        shim: false,
+    },
 
     ssr: false,
-    modules: ["@nuxt/ui"]
+    modules: [
+      "@nuxt/ui",
+      "@formkit/auto-animate/nuxt",
+      "@nuxt/image",
+    ],
 });

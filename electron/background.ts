@@ -1,6 +1,6 @@
 import * as path from 'path'
 import * as os from 'os'
-import { app, BrowserWindow, session } from 'electron'
+import { app, BrowserWindow, session, ipcMain, dialog } from 'electron'
 import singleInstance from './singleInstance'
 import dynamicRenderer from './dynamicRenderer'
 import titleBarActionsModule from './modules/titleBarActions'
@@ -30,7 +30,7 @@ function createWindow() {
     webPreferences: {
       devTools: !isProduction,
       nodeIntegration: true,
-      contextIsolation: false,
+      contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
     },
 
@@ -52,6 +52,14 @@ function createWindow() {
 
   return mainWindow
 }
+
+// Function to open file dialog
+ipcMain.handle('open-file-dialog', async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openFile']
+  });
+  return result.filePaths;
+})
 
 // App events
 // ==========

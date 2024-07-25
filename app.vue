@@ -4,14 +4,12 @@
     <h1>💖 Hello World!</h1>
     <p>Welcome to your Electron application.</p>
     <UButton label="Open Folder" @click="openFolder" />
-    <UButton label="Open File" @click="openFile" />
-    <div v-if="selectedFolder">Selected Folder: {{ selectedFolder }}</div>
-    <div v-if="selectedFile">Selected File: {{ selectedFile }}</div>
+    <UButton label="Open File" @click="openFile" id="openFileDialogButton" />
     <div v-if="selectedFolder">Found {{ imagecount }} Images</div>
     <div v-if="selectedFile">Found {{ imagecount }} Images</div>
     <div class="row-container">
       <p>Choose your IQA-Model</p>
-      <USelect v-model="model" :options="models" option-attribute="name"/>
+      <USelect v-model="model" :options="models" option-attribute="name" v-auto-animate/>
       <UButton label="Rate Images" @click="openFile" />
     </div>
 
@@ -22,7 +20,7 @@
     <div class="row-container">
       <p>Set your desired Level of Quality</p>
       <div class="column-container">
-        <URange size="md" :min="0" :max="1" :step="0.05" v-model="sliderValue" :sliderValue="0.6" />
+        <URange size="md" :min="0" :max="1" :step="0.05" v-model="sliderValue" :sliderValue="0.6" v-auto-animate/>
         <p>Slider value: {{ sliderValue }}</p>
       </div>
     </div>
@@ -66,17 +64,6 @@
 <script>
 import { ref } from 'vue';
 
-// Step 1: Mocking window.electron methods
-const electronMock = {
-  async openFolder() {
-    // Simulate selecting a folder path
-    return ['/path/to/selected/folder'];
-  },
-  async openFile() {
-    // Simulate selecting a file path
-    return ['/path/to/selected/file.txt'];
-  },
-};
 
 const models = [{
   name: 'clipiqa',
@@ -102,7 +89,7 @@ export default {
       ],
       sliderValue: 0.6,
       selectedFolder: '',
-      selectedFile: '',
+      selectedFile: null,
       model: 'clipiqa', // Define model here
       models: models, // Make models available in the template
       isImageViewerOpen: false,
@@ -119,19 +106,21 @@ export default {
     closeImageViewer() {
       this.isImageViewerOpen = false;
     },
-
-    async openFolder() {
-      const folderPaths = await (window.electron ? window.electron.openFolder() : electronMock.openFolder());
-      if (folderPaths.length > 0) {
-        this.selectedFolder = folderPaths[0];
-        console.log(`Selected folder: ${this.selectedFolder}`);
-      }
-    },
+    
     async openFile() {
-      const filePaths = await (window.electron ? window.electron.openFile() : electronMock.openFile());
+      const filePaths = await window.electron.send('open-file-dialog');
       if (filePaths.length > 0) {
         this.selectedFile = filePaths[0];
         console.log(`Selected file: ${this.selectedFile}`);
+        // Implement the logic to handle the selected file path here...
+      }
+    },
+    async openFolder() {
+      const folderPaths = await window.electron.send('open-folder-dialog');
+      if (folderPaths.length > 0) {
+        this.selectedFolder = folderPaths[0];
+        console.log(`Selected folder: ${this.selectedFolder}`);
+        // Implement the logic to handle the selected folder path here...
       }
     },
     modelChanged() {
