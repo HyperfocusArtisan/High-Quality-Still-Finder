@@ -1,26 +1,26 @@
 
 <template>
-  <div id="app">
-    <h1>💖 Hello World!</h1>
-    <p>Welcome to your Electron application.</p>
-    <UButton label="Open Folder" @click="openFolder" />
-    <UButton label="Open File" @click="openFile" id="openFileDialogButton" />
-    <div v-if="selectedFolder">Found {{ imagecount }} Images</div>
-    <div v-if="selectedFile">Found {{ imagecount }} Images</div>
-    <div class="row-container">
-      <p>Choose your IQA-Model</p>
-      <USelect v-model="model" :options="models" option-attribute="name" v-auto-animate/>
-      <UButton label="Rate Images" @click="openFile" />
+  <div id="app" class="m-auto text-center max-w-[45rem] p-8">
+    <h1 class="text-2xl font-bold mb-4 ">💖 Hello World!</h1>
+    <p class="mb-4">Welcome to your Electron application.</p>
+    <UButton label="Open Folder" @click="openFolder" class="text-center m-2.5 py-2.5 px-5 text-base cursor-pointer rounded transition-colors duration-300 ease-in-out mb-2" />
+    <UButton label="Open File" @click="openFile" id="openFileDialogButton" class="text-center m-2.5 py-2.5 px-5 text-base cursor-pointer rounded transition-colors duration-300 ease-in-out mb-4" />
+    <div v-if="selectedFolder" class="mb-4">Found {{ imagecount }} Images</div>
+    <div v-if="selectedFile" class="mb-4">Found {{ imagecount }} Images</div>
+    <div class="flex flex-row justify-between m-auto p-[2rem] border-2 border-gray-500 p-4 mb-4">
+      <p class="mb-2">Choose your IQA-Model</p>
+      <USelect v-model="model" :options="models" option-attribute="name" v-auto-animate class="text-center m-2.5 py-2.5 px-5 text-base cursor-pointer rounded transition-colors duration-300 ease-in-out mb-2" />
+      <UButton label="Rate Images" @click="openFile" class="text-center m-2.5 py-2.5 px-5 text-base cursor-pointer rounded transition-colors duration-300 ease-in-out" />
     </div>
 
-    <UCarousel v-if="selectedFolder" v-slot="{ item }" :items="items" :ui="{ item: 'basis-full' }" class="rounded-lg overflow-hidden" arrows>
+    <UCarousel v-slot="{ item }" :items="items" :ui="{ item: 'basis-full' }" class="text-center m-2.5 py-2.5 px-5 text-base cursor-pointer rounded transition-colors duration-300 ease-in-out overflow-hidden mb-4" arrows>
       <img :src="item" class="w-full" draggable="true" @click="openImage($event)">
     </UCarousel>
 
-    <div class="row-container">
-      <p>Set your desired Level of Quality</p>
-      <div class="column-container">
-        <URange size="md" :min="0" :max="1" :step="0.05" v-model="sliderValue" :sliderValue="0.6" v-auto-animate/>
+    <div class="flex flex-row justify-between m-auto p-[2rem]">
+      <p class="mb-2">Set your desired Level of Quality</p>
+      <div class="flex flex-col justify-between min-w-[200px]">
+        <URange size="md" :min="0" :max="1" :step="0.05" v-model="sliderValue" :sliderValue="0.6" v-auto-animate class="text-center m-2.5 py-2.5 px-5 text-base cursor-pointer rounded transition-colors duration-300 ease-in-out mb-2" />
         <p>Slider value: {{ sliderValue }}</p>
       </div>
     </div>
@@ -42,8 +42,8 @@
             }
           }"
         >
-        <div class="image-viewer-container">
-          <img :src="selectedImageSrc" class="image-viewer-content">
+        <div class="flex justify-center align-top h-[100vh] p-[10]">
+          <img :src="selectedImageSrc" class=" max-w-[100%] max-h-[75vh] block">
         </div>
           <template #header>
             <div class="flex items-center justify-between">
@@ -52,8 +52,7 @@
               </h3>
               <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" class="-my-1" @click="isImageViewerOpen = false" />
             </div>
-            <NuxtPage />
-</template>
+          </template>
         </UCard>
       </UModal>
     </div>
@@ -62,6 +61,8 @@
 </template>
 
 <script>
+import fs from 'fs';
+import path from 'path';
 import { ref } from 'vue';
 
 
@@ -80,15 +81,10 @@ export default {
   data() {
     return {
       items: [
-        'https://picsum.photos/1920/1080?random=1',
-        'https://picsum.photos/1920/1080?random=2',
-        'https://picsum.photos/1920/1080?random=3',
-        'https://picsum.photos/1920/1080?random=4',
-        'https://picsum.photos/1920/1080?random=5',
-        'https://picsum.photos/1920/1080?random=6'
+        'https://placehold.co/600x300?text=Rated+Images+Shown+Here',
       ],
       sliderValue: 0.6,
-      selectedFolder: '',
+      selectedFolder: null,
       selectedFile: null,
       model: 'clipiqa', // Define model here
       models: models, // Make models available in the template
@@ -108,19 +104,22 @@ export default {
     },
     
     async openFile() {
-      const filePaths = await window.electron.send('open-file-dialog');
-      if (filePaths.length > 0) {
+      const filePaths = await window.electron.invoke('open-file-dialog');
+      if (filePaths) {
         this.selectedFile = filePaths[0];
         console.log(`Selected file: ${this.selectedFile}`);
         // Implement the logic to handle the selected file path here...
       }
     },
     async openFolder() {
-      const folderPaths = await window.electron.send('open-folder-dialog');
-      if (folderPaths.length > 0) {
-        this.selectedFolder = folderPaths[0];
+      const result = await window.electron.invoke('select-folder');
+      if (result) {
+        this.selectedFolder = result.folderPath;
+        this.imagecount = result.imageCount;
+        console.log(`Found ${this.imagecount} images`);
         console.log(`Selected folder: ${this.selectedFolder}`);
-        // Implement the logic to handle the selected folder path here...
+      } else {
+        console.log('No folder selected');
       }
     },
     modelChanged() {
@@ -128,7 +127,7 @@ export default {
     },
     sliderChanged() {
       console.log(`Slider changed to ${this.sliderValue}%`);
-    },
+    }
   },
   components: {
   }
@@ -136,5 +135,9 @@ export default {
 </script>
 
 <style scoped>
-  @import "index.css";
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+  #app {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
+  };
 </style>

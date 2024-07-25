@@ -15,6 +15,7 @@ const platform: 'darwin' | 'win32' | 'linux' = process.platform as any
 const architucture: '64' | '32' = os.arch() === 'x64' ? '64' : '32'
 const headerSize = 32
 const modules = [titleBarActionsModule, macMenuModule, updaterModule]
+const fs = require('fs');
 
 // Initialize app window
 // =====================
@@ -22,10 +23,8 @@ function createWindow() {
   console.log('System info', { isProduction, platform, architucture })
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1440,
-    height: 1024,
-    minWidth: 1024,
-    minHeight: 676,
+    width: 676,
+    height: 800,
     backgroundColor: '#000',
     webPreferences: {
       devTools: !isProduction,
@@ -57,6 +56,13 @@ function createWindow() {
 ipcMain.handle('open-file-dialog', async () => {
   const result = await dialog.showOpenDialog({
     properties: ['openFile']
+  });
+  return result.filePaths;
+})
+
+ipcMain.handle('open-folder-dialog', async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openDirectory']
   });
   return result.filePaths;
 })
@@ -106,3 +112,39 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
+
+ipcMain.handle('select-folder', async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openDirectory']
+  });
+
+  if (result.canceled) {
+    return null;
+  } else {
+    const folderPath = result.filePaths[0];
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
+    const imageFiles: string[] = [];
+
+    try {
+      const files = fs.readdirSync(folderPath);
+      console.log(`Files in folder: ${files.length}`); // Debugging line
+
+      for (const file of files) {
+        const ext = path.extname(file).toLowerCase();
+        if (imageExtensions.includes(ext)) {
+          imageFiles.push(file);
+        }
+      }
+      console.log(`Image files found: ${imageFiles.length}`);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(`Error reading directory: ${error.message}`);
+      } else {
+        console.error('An unknown error occurred');
+      }
+      return null;
+    }
+    
+    return { folderPath, imageCount: imageFiles.length };
+  }
+});
