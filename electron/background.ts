@@ -6,6 +6,8 @@ import dynamicRenderer from './dynamicRenderer'
 import titleBarActionsModule from './modules/titleBarActions'
 import updaterModule from './modules/updater'
 import macMenuModule from './modules/macMenu'
+import * as fs from 'fs';
+import express, { Request, Response, NextFunction } from 'express';
 
 // Initilize
 // =========
@@ -15,7 +17,10 @@ const platform: 'darwin' | 'win32' | 'linux' = process.platform as any
 const architucture: '64' | '32' = os.arch() === 'x64' ? '64' : '32'
 const headerSize = 32
 const modules = [titleBarActionsModule, macMenuModule, updaterModule]
-const fs = require('fs');
+const Papa = require('papaparse');
+const server = express();
+
+let basePath: string | null = null;
 
 // Initialize app window
 // =====================
@@ -149,16 +154,53 @@ ipcMain.handle('select-folder', async () => {
   }
 });
 
-ipcMain.handle('read-csv', async (event, filePath) => {
+ipcMain.handle('read-csv', async (event, csvPath) => {
   try {
-    const data = fs.readFileSync(filePath, 'utf8');
-    const basePath = path.dirname(filePath);
-    return { success: true, data, basePath };
-  } catch (err) {
-    let errorMessage = 'An unknown error occurred';
-    if (err instanceof Error) {
-      errorMessage = err.message;
+    const filePath = path.resolve(csvPath);
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    console.log("File Content:", fileContent);
+
+    // Parse CSV data to JSON without headers
+    const parsedData = Papa.parse(fileContent, {
+      header: false,
+      dynamicTyping: true,
+      skipEmptyLines: true
+    });
+
+    console.log("Parsed JSON Data:", parsedData.data);
+    console.log("Parsed Errors:", parsedData.errors);
+
+    return { success: true, data: parsedData.data };
+  } catch (error) {
+    console.error("Error reading CSV file:", error);
+
+    // Type guard to check if error is an instance of Error
+    if (error instanceof Error) {
+      return { success: false, error: error.message };
+    } else {
+      return { success: false, error: 'An unknown error occurred' };
     }
-    return { success: false, error: errorMessage };
   }
+});
+
+server.use('/set-base-path', (req: Request, res: Response) => {
+  basePath = req.query.path as string;
+  res.send(`Base path set to: ${basePath}`);
+});
+
+server.use('/images', (req: Request, res: Response, next: NextFunction) => {
+  if (!basePath) {
+    return res.status(400).send('Base path not set');
+  }
+  express.static(basePath)(req, res, next);
+});
+
+server.listen(3000, () => {
+  console.log('Server is running on http://localhost:3000');
+});
+
+// Handle setting the base path from the renderer process
+ipcMain.handle('set-base-path', (event, csvPath) => {
+  basePath = path.dirname(csvPath);
+  console.log('Base path set to:', basePath);
 });

@@ -58,16 +58,11 @@
     </div>
 
 
-    <div>
-      <div v-if="items.length === 0">
-        No images to display.
-      </div>
-      <div v-else>
-        <div v-for="(image, index) in items" :key="index">
-          <img :src="image" alt="Filtered Image" />
-        </div>
-      </div>
+  <div>
+    <div v-for="image in filteredImages" :key="image">
+      <img :src="image" alt="Image" />
     </div>
+  </div>
     
   </div>
 </template>
@@ -76,6 +71,7 @@
 import path from 'path';
 import axios from 'axios';
 import Papa from 'papaparse';
+import { Parser } from '@json2csv/plainjs';
 
 const models = [{
   name: 'clipiqa',
@@ -162,6 +158,11 @@ export default {
         return;
       }
     
+      console.log("CSV Path:", this.csvPath);
+    
+      // Set the base path for the images
+      await window.electron.invoke('set-base-path', this.csvPath);
+    
       const result = await window.electron.invoke('read-csv', this.csvPath);
     
       if (!result.success) {
@@ -169,16 +170,45 @@ export default {
         return;
       }
     
-      console.log("CSV Data:", result.data);
+      console.log("Raw CSV Data:", result.data);
     
-      Papa.parse(result.data, {
-        header: true,
+      // Process the parsed data
+      const processedData = result.data.map(row => {
+        const [filename, score] = row;
+        return { filename, score };
+      });
+    
+      console.log("Processed Data:", processedData);
+    
+      // Convert JSON array to CSV string
+      let csvString;
+      try {
+        if (!processedData || processedData.length === 0) {
+          throw new Error("No data available to convert to CSV.");
+        }
+        const opts = { fields: Object.keys(processedData[0]) };
+        const parser = new Parser(opts);
+        csvString = parser.parse(processedData);
+      } catch (error) {
+        console.error("Error converting JSON to CSV:", error);
+        return;
+      }
+    
+      Papa.parse(csvString, {
+        header: true, // Assuming the CSV has headers
         complete: (results) => {
           console.log("Parsed CSV Results:", results.data);
-          const basePath = result.basePath; // Use the basePath from the result
           this.filteredImages = results.data
-            .filter(row => parseFloat(row.score) >= this.sliderValue)
-            .map(row => path.join(basePath, row.filepath)); // Prepend the base path to the filenames
+            .filter(row => {
+              const score = parseFloat(row.score);
+              console.log(`Row: ${JSON.stringify(row)}, Score: ${score}, Slider Value: ${this.sliderValue}`);
+              return score >= this.sliderValue;
+            }) // Adjust based on your CSV structure
+            .map(row => {
+              const imagePath = `http://localhost:3000/images/${row.filename}`;
+              console.log(`Image Path: ${imagePath}`);
+              return imagePath;
+            }); // Adjust based on your CSV structure
           console.log("Filtered Images:", this.filteredImages);
           this.items = this.filteredImages;
         },

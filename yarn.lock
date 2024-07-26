@@ -673,6 +673,19 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
+"@json2csv/formatters@^7.0.6":
+  version "7.0.6"
+  resolved "https://registry.npmjs.org/@json2csv/formatters/-/formatters-7.0.6.tgz"
+  integrity sha512-hjIk1H1TR4ydU5ntIENEPgoMGW+Q7mJ+537sDFDbsk+Y3EPl2i4NfFVjw0NJRgT+ihm8X30M67mA8AS6jPidSA==
+
+"@json2csv/plainjs@^7.0.6":
+  version "7.0.6"
+  resolved "https://registry.npmjs.org/@json2csv/plainjs/-/plainjs-7.0.6.tgz"
+  integrity sha512-4Md7RPDCSYpmW1HWIpWBOqCd4vWfIqm53S3e/uzQ62iGi7L3r34fK/8nhOMEe+/eVfCx8+gdSCt1d74SlacQHw==
+  dependencies:
+    "@json2csv/formatters" "^7.0.6"
+    "@streamparser/json" "^0.0.20"
+
 "@koa/router@^12.0.1":
   version "12.0.1"
   resolved "https://registry.npmjs.org/@koa/router/-/router-12.0.1.tgz"
@@ -1241,6 +1254,11 @@
   version "2.3.0"
   resolved "https://registry.npmjs.org/@sindresorhus/merge-streams/-/merge-streams-2.3.0.tgz"
   integrity sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==
+
+"@streamparser/json@^0.0.20":
+  version "0.0.20"
+  resolved "https://registry.npmjs.org/@streamparser/json/-/json-0.0.20.tgz"
+  integrity sha512-VqAAkydywPpkw63WQhPVKCD3SdwXuihCUVZbbiY3SfSTGQyHmwRoq27y4dmJdZuJwd5JIlQoMPyGvMbUPY0RKQ==
 
 "@szmarczak/http-timer@^4.0.5":
   version "4.0.6"
@@ -3304,6 +3322,13 @@ csstype@^3.1.3:
   version "3.1.3"
   resolved "https://registry.npmjs.org/csstype/-/csstype-3.1.3.tgz"
   integrity sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==
+
+csv-parser@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.npmjs.org/csv-parser/-/csv-parser-3.0.0.tgz"
+  integrity sha512-s6OYSXAK3IdKqYO33y09jhypG/bSDHPuyCme/IdEHfWpLf/jKcpitVFyOC6UemgGk8v7Q5u2XE0vvwmanxhGlQ==
+  dependencies:
+    minimist "^1.2.0"
 
 date-fns@^2.30.0:
   version "2.30.0"
