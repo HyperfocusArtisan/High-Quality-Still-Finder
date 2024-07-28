@@ -86,7 +86,8 @@ const models = [{
   value: 'clipiqa+'
 }, {
   name: 'clipiqa+_vitL14_512',
-  value: 'clipiqa+_vitL14_512'
+  value: 'clipiqa+_vitL14_512',
+  disaibled: true
 }, {
   name: 'qalign',
   value: 'qalign'
