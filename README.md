@@ -22,15 +22,19 @@ High-Quality-Still Finder is an advanced tool designed to dynamically scan folde
    ```sh
    git clone https://github.com/yourusername/high-quality-still-finder.git
 2. Navigate to the project directory:
+   ```sh
    cd high-quality-still-finder
 3. Install the dependencies:
+   ```sh
    npm install
 
 ## Usage
 
 1. Start the application:
+   ```sh
    npm run dev:electron:win
 2. Start the Python backend:
+   ```sh
    env/scripts/python.exe iqa/main.py
 
 ## Contributing
