@@ -7,7 +7,6 @@ import titleBarActionsModule from './modules/titleBarActions'
 import updaterModule from './modules/updater'
 import macMenuModule from './modules/macMenu'
 import * as fs from 'fs';
-import express, { Request, Response, NextFunction } from 'express';
 
 // Initilize
 // =========
@@ -18,7 +17,6 @@ const architucture: '64' | '32' = os.arch() === 'x64' ? '64' : '32'
 const headerSize = 32
 const modules = [titleBarActionsModule, macMenuModule, updaterModule]
 const Papa = require('papaparse');
-const server = express();
 
 let basePath: string | null = null;
 
@@ -29,13 +27,14 @@ function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 676,
-    height: 800,
+    height: 950,
     backgroundColor: '#000',
     webPreferences: {
       devTools: !isProduction,
       nodeIntegration: true,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+      webSecurity: false
     },
 
     titleBarStyle: 'hiddenInset',
@@ -183,24 +182,9 @@ ipcMain.handle('read-csv', async (event, csvPath) => {
   }
 });
 
-server.use('/set-base-path', (req: Request, res: Response) => {
-  basePath = req.query.path as string;
-  res.send(`Base path set to: ${basePath}`);
-});
-
-server.use('/images', (req: Request, res: Response, next: NextFunction) => {
-  if (!basePath) {
-    return res.status(400).send('Base path not set');
-  }
-  express.static(basePath)(req, res, next);
-});
-
-server.listen(3000, () => {
-  console.log('Server is running on http://localhost:3000');
-});
-
 // Handle setting the base path from the renderer process
 ipcMain.handle('set-base-path', (event, csvPath) => {
   basePath = path.dirname(csvPath);
   console.log('Base path set to:', basePath);
+  return { success: true, basePath };
 });

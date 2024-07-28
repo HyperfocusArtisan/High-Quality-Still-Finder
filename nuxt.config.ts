@@ -11,4 +11,10 @@ export default defineNuxtConfig({
       "@formkit/auto-animate/nuxt",
       "@nuxt/image",
     ],
+
+    vue: {
+      compilerOptions: {
+          isCustomElement: tag => tag === 'vue-silentbox'
+      }
+    },
 });

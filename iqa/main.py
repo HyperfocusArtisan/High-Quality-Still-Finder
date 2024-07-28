@@ -54,6 +54,14 @@ def iqa():
                 iqa_metric = pyiqa.create_metric('clipiqa+_vitL14_512', device=device)
             elif model == 'fid':
                 iqa_metric = pyiqa.create_metric('fid', device=device)
+            elif model == 'brisque':
+                iqa_metric = pyiqa.create_metric('brisque', device=device)
+            elif model == 'qalign':
+                iqa_metric = pyiqa.create_metric('qalign', device=device)
+            elif model == 'topiq_iaa':
+                iqa_metric = pyiqa.create_metric('topiq_iaa', device=device)
+            elif model == 'nima':
+                iqa_metric = pyiqa.create_metric('nima', device=device)
             else:
                 raise ValueError(f'Unknown model: {model}')
             
