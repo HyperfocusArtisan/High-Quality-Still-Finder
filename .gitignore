@@ -419,3 +419,6 @@ FodyWeavers.xsd
 
 iqa/env
 env
+
+
+.copilot/
