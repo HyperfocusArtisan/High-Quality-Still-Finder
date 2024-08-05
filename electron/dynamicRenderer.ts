@@ -20,4 +20,4 @@ export default function (mainWindow: BrowserWindow) {
     console.log('Dynamic-Renderer Listening on', port)
     mainWindow.loadURL(`http://localhost:${port}`)
   })
-};
+}

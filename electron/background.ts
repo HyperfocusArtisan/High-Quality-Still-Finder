@@ -1,12 +1,12 @@
 import * as path from 'path'
 import * as os from 'os'
+import * as fs from 'fs'
 import { app, BrowserWindow, session, ipcMain, dialog } from 'electron'
 import singleInstance from './singleInstance'
 import dynamicRenderer from './dynamicRenderer'
 import titleBarActionsModule from './modules/titleBarActions'
 import updaterModule from './modules/updater'
 import macMenuModule from './modules/macMenu'
-import * as fs from 'fs';
 
 // Initilize
 // =========
@@ -18,7 +18,7 @@ const headerSize = 32
 const modules = [titleBarActionsModule, macMenuModule, updaterModule]
 const Papa = require('papaparse');
 
-let basePath: string | null = null;
+let basePath: string | null = null
 
 // Initialize app window
 // =====================
