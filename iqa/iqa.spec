@@ -1,13 +1,26 @@
 # -*- mode: python ; coding: utf-8 -*-
+import pyiqa
 from PyInstaller.utils.hooks import collect_data_files, collect_submodules
-import os
+pyiqa_path = os.path.dirname(pyiqa.__file__)
+clip_datas = collect_data_files('clip')
+timm_datas = collect_data_files('timm')
+timm_submodules = collect_submodules('timm')
+imgaug_datas = collect_data_files('imgaug')
+facexlib_datas = collect_data_files('facexlib')
+
 
 a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[],
-    hiddenimports=[],
+    datas=[
+    (pyiqa_path, 'pyiqa'),
+    *clip_datas,
+    *timm_datas,
+    *imgaug_datas,
+    *facexlib_datas,
+    ],
+    hiddenimports=['pyiqa', 'torch', 'cv2', 'flask', 'flask_cors', 'clip', 'timm', 'timm.models', 'timm.models.layers', *timm_submodules, 'imgaug', 'facexlib'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -17,17 +30,9 @@ a = Analysis(
 )
 pyz = PYZ(a.pure)
 
-splash = Splash(
-                binaries=a.binaries,
-                datas=a.datas,
-                text_pos=None,
-                always_on_top=True)
-
 exe = EXE(
     pyz,
     a.scripts,
-    splash,
-    splash.binaries,
     a.binaries,
     a.datas,
     [],
@@ -45,3 +50,4 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None
 )
+
