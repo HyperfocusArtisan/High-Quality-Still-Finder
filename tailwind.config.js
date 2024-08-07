@@ -6,10 +6,9 @@ module.exports = {
       fontFamily: {
         sans: ['CustomSans', 'Helvetica', 'Arial', 'sans-serif', 'Inter'],
         serif: ['CustomSerif', 'Georgia', 'serif'],
-        mono: ['CustomMono', 'SFMono-Regular', 'Menlo', 'monospace'],
-      },
-    },
+        mono: ['CustomMono', 'SFMono-Regular', 'Menlo', 'monospace']
+      }
+    }
   },
-  plugins: [],
+  plugins: []
 }
-

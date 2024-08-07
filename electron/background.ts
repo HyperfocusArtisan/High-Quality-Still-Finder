@@ -22,8 +22,12 @@ const Papa = require('papaparse')
 
 let basePath: string | null = null
 
-const iqaPath = path.join(__dirname, 'iqa', 'iqa.exe')
+const iqaPath = app.isPackaged ? path.join(process.resourcesPath, 'iqa', 'iqa.exe') : path.join(__dirname, 'iqa', 'iqa.exe')
+
+console.log('IQA path:', iqaPath)
+console.log('Spawning IQA process...')
 const iqaProcess = spawn(iqaPath)
+console.log('IQA process spawned')
 
 iqaProcess.on('error', (err) => {
   console.error('Error starting iqa.exe:', err)
@@ -61,6 +65,14 @@ function createWindow() {
     mainWindow.webContents.openDevTools({
       mode: 'bottom'
     })
+
+  iqaProcess.stdout.on('data', (data) => {
+    console.log('IQA process output:', data.toString())
+    if (data.toString().includes('Debug mode: off')) {
+      console.log('Sending iqa-ready event to renderer')
+      mainWindow.webContents.send('iqa-ready')
+    }
+  })
 
   return mainWindow
 }

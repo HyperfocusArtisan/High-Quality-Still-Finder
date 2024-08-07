@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="m-auto text-center p-8 max-w-[45rem]">
     <h1 class="text-2xl font-bold mb-4">💖 Hello World!</h1>
-    <p class="mb-4">Welcome to your Electron application.</p>
+    <p class="mb-4">Welcome to my Image-Quality-Assessment Interface.</p>
     <UButton label="Open Folder" class="text-center m-2.5 py-2.5 px-5 text-base cursor-pointer rounded transition-colors duration-300 ease-in-out mb-2" @click="openFolder" />
     <UButton
       id="openFileDialogButton"
@@ -12,6 +12,8 @@
     <div v-if="selectedFolder" class="mb-4">Found {{ imagecount }} Images</div>
     <div v-if="selectedFile" class="mb-4">Found {{ imagecount }} Images</div>
     <UCard>
+      <div v-if="!iqaReady" class="mb-2 m-auto">Waiting for Python Backend</div>
+      <UProgress v-if="!iqaReady" animation="carousel" />
       <div class="flex flex-row text-center m-auto p-4 h-12 mb-6">
         <p class="mb-2 m-auto">Choose your IQA-Model</p>
         <USelect
@@ -21,7 +23,13 @@
           option-attribute="name"
           class="text-center m-auto py-2.5 px-5 text-base cursor-pointer rounded transition-colors duration-300 ease-in-out mb-2"
         />
-        <UButton label="Rate Images" class="text-center m-auto py-2.5 px-5 text-base cursor-pointer rounded transition-colors duration-300 ease-in-out" @click="triggerIqa" />
+        <UButton
+          label="Rate Images"
+          class="text-center m-auto py-2.5 px-5 text-base cursor-pointer rounded transition-colors duration-300 ease-in-out"
+          :loading="!iqaReady"
+          :disabled="!iqaReady"
+          @click="triggerIqa"
+        />
       </div>
     </UCard>
 
@@ -129,6 +137,22 @@ const models = [
 
 export default {
   components: {},
+  setup() {
+    const iqaReady = ref(false)
+
+    onMounted(() => {
+      console.log('Component mounted, setting up IQA ready listener')
+      window.electron.onIqaReady(() => {
+        console.log('IQA ready event received in renderer')
+        iqaReady.value = true
+        console.log('iqaReady value set to:', iqaReady.value)
+      })
+    })
+
+    return {
+      iqaReady
+    }
+  },
   data() {
     return {
       items: ['https://placehold.co/600x300?text=Rated+Images+Shown+Here'],
