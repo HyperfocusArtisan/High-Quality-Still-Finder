@@ -62,6 +62,18 @@ def iqa():
                 iqa_metric = pyiqa.create_metric('topiq_iaa', device=device)
             elif model == 'nima':
                 iqa_metric = pyiqa.create_metric('nima', device=device)
+            elif model == 'dbcnn':
+                iqa_metric = pyiqa.create_metric('dbcnn', device=device)
+            elif model == 'hyperiqa':
+                iqa_metric = pyiqa.create_metric('hyperiqa', device=device)
+            elif model == 'topiq_nr':
+                iqa_metric = pyiqa.create_metric('topiq_nr', device=device)
+            elif model == 'clipiqa+_rn50_512':
+                iqa_metric = pyiqa.create_metric('clipiqa+_rn50_512', device=device)
+            elif model == 'maniqa':
+                iqa_metric = pyiqa.create_metric('maniqa', device=device)
+            elif model == 'musiq-koniq':
+                iqa_metric = pyiqa.create_metric('musiq-koniq', device=device)
             else:
                 raise ValueError(f'Unknown model: {model}')
             

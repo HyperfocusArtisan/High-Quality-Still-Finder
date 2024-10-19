@@ -101,6 +101,30 @@ import { Parser } from '@json2csv/plainjs'
 
 const models = [
   {
+    name: 'dbcnn',
+    value: 'dbcnn'
+  },
+  {
+    name: 'hyperiqa',
+    value: 'hyperiqa'
+  },
+  {
+    name: 'topiq_nr',
+    value: 'topiq_nr'
+  },
+  {
+    name: 'clipiqa+_rn50_512',
+    value: 'clipiqa+_rn50_512'
+  },
+  {
+    name: 'maniqa',
+    value: 'maniqa'
+  },
+  {
+    name: 'musiq-koniq',
+    value: 'musiq-koniq'
+  },
+  {
     name: 'clipiqa',
     value: 'clipiqa'
   },
