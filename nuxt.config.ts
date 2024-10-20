@@ -2,22 +2,20 @@
 
 export default defineNuxtConfig({
   typescript: {
-      shim: false,
+    shim: false
   },
 
   ssr: false,
 
-  modules: [
-    "@nuxt/ui",
-    "@formkit/auto-animate/nuxt",
-    "@nuxt/image",
-  ],
+  modules: ['@nuxt/ui', '@formkit/auto-animate/nuxt', '@nuxt/image'],
 
   vue: {
     compilerOptions: {
-        isCustomElement: tag => tag === 'vue-silentbox'
+      isCustomElement: (tag: string) => tag === 'vue-silentbox'
     }
   },
 
-  compatibilityDate: "2024-10-19",
-});
+  app: {
+    compatibilityDate: '2024-10-20'
+  }
+})

@@ -1,4 +1,3 @@
-// Import the necessary Electron modules
 import { contextBridge, ipcRenderer } from 'electron'
 
 // Expose a safe API to the renderer process
